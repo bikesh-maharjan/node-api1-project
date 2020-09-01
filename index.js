@@ -62,10 +62,14 @@ server.post("/api/users", (req, res) => {
   if (user.bio && user.name) {
     users.push({ id: shortid.generate(), ...user });
     res.status(201).json({ data: users });
-  } else {
+  } else if (!user.bio || !user.name) {
     res
       .status(400)
       .json({ errorMessage: "please provide name and bior for the user" });
+  } else {
+    res.status(500).json({
+      errorMessage: "there was an errro wwhille saving to the database ",
+    });
   }
 });
 
@@ -80,7 +84,7 @@ server.put("/api/users/:id", (req, res) => {
       .status(400)
       .json({ errorMessage: "please provde name and bio for the user" });
   } else if (user.id === id) {
-    Object.assign(user, userEdit);
+    Object.assign(user, editUser);
     res.status(200).json(user);
   } else {
     res
@@ -89,12 +93,13 @@ server.put("/api/users/:id", (req, res) => {
   }
 });
 
-//DELTE REQUEST//
+//DELETE REQUEST//
 
-server.delete("api/user/:id", (req, res) => {
+server.delete("/api/users/:id", (req, res) => {
   const id = req.params.id;
   if (users.find((user) => user.id === id)) {
     const newUsers = users.filter((user) => user.id !== id);
+    console.log(newUsers);
     res.status(200).json(newUsers);
   } else if (!users.find((user) => user.id === id)) {
     res
